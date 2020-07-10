@@ -1,0 +1,26 @@
+{
+  "global" : {
+    "check_interval_seconds" : 1,
+    "measurement_unit" : 10
+  },
+  "events" : {
+    "recv" : {
+      "value" : 5,
+      "type" : ""
+    },
+    "sent" : {
+      "value" : 10,
+      "type" : ""
+    },
+    "time" : {
+      "value" : 5,
+      "type" : "shell_command",
+      "execute" : "echo hello_world!"
+    },
+    "total" : {
+      "value" : 2,
+      "type" : "bash_script",
+      "execute" : "./test.sh"
+    }
+  }
+}
