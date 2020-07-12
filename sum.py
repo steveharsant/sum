@@ -3,6 +3,7 @@ from subprocess import call
 import json
 import os
 import glob
+import signal
 import time
 
 def load_config():
@@ -12,7 +13,8 @@ def load_config():
     config = json.loads(contents)
     return config
 
-# Load configuration
+# Load configuration. This must be done before functions that use
+# variables in the json config file.
 config = load_config()
 check_interval_seconds = config['global']['check_interval_seconds']
 measurement_unit = config['global']['measurement_unit']
@@ -27,12 +29,17 @@ def execute_bash_script(script_location):
   shell_script = call("./test.sh", shell=True)
   return shell_script
 
+def handler(signum, frame):
+  print('\n')
+  exit (0)
+
 #
 # Start
 #
 
+# Initalise timer, set graceful sigkill, and set io offsets.
 timer_start = time.time()
-
+signal.signal(signal.SIGINT, handler)
 recv_initial_value = io().bytes_recv
 sent_initial_value = io().bytes_sent
 
@@ -41,15 +48,17 @@ while True:
   sent_value = convert_value(io().bytes_sent - sent_initial_value)
   total_value = recv_value + sent_value
 
-  timer_elapsed = int(time.time() - timer_start)
+  timer_elapsed_seconds = int(time.time() - timer_start)
+
+  # Event on total data transfer
   if total_value >= event_total_value and 'event_total_value_triggered' not in locals():
     event_total_value_triggered = True
     bash_exit_code = execute_bash_script(event_total_execute)
-    # Write log of result. result should == 0
+
 
   print("Recv: %.2fM | " % recv_value + \
         "Sent: %.2fM | " % sent_value + \
         "Total: %.2fM | " % total_value + \
-        "Elapssed: {} seconds".format(timer_elapsed), end='\r')
+        "Elapssed: {} seconds".format(timer_elapsed_seconds), end='\r')
 
   time.sleep(check_interval_seconds)

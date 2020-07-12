@@ -1,6 +1,6 @@
 {
   "global" : {
-    "check_interval_seconds" : 1,
+    "check_interval_seconds" : 0,
     "measurement_unit" : 10
   },
   "events" : {
